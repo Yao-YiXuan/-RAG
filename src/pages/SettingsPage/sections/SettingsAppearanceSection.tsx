@@ -1,10 +1,10 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Sun, Moon, Globe } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { useI18n } from '@/lib/i18n';
 
 interface SettingsAppearanceSectionProps {
   theme: 'dark' | 'light';
@@ -19,10 +19,10 @@ export default function SettingsAppearanceSection({
   onThemeChange,
   onLanguageChange,
 }: SettingsAppearanceSectionProps) {
-  const [isDark, setIsDark] = useState(theme === 'dark');
+  const isDark = theme === 'dark';
+  const { t } = useI18n();
 
   const handleThemeToggle = (checked: boolean) => {
-    setIsDark(checked);
     onThemeChange(checked ? 'dark' : 'light');
   };
 
@@ -37,10 +37,10 @@ export default function SettingsAppearanceSection({
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg font-semibold">
             <Globe className="size-5 text-primary" />
-            界面设置
+            {t('settings.appearance.title')}
           </CardTitle>
           <CardDescription className="text-muted-foreground">
-            自定义界面主题和语言偏好
+            {t('settings.appearance.desc')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -55,9 +55,9 @@ export default function SettingsAppearanceSection({
                 )}
               </div>
               <div>
-                <Label className="text-sm font-medium">深色模式</Label>
+                <Label className="text-sm font-medium">{t('settings.appearance.darkMode')}</Label>
                 <p className="text-xs text-muted-foreground">
-                  {isDark ? '当前为深色主题' : '当前为浅色主题'}
+                  {isDark ? t('settings.appearance.darkDesc') : t('settings.appearance.lightDesc')}
                 </p>
               </div>
             </div>
@@ -75,8 +75,8 @@ export default function SettingsAppearanceSection({
                 <Globe className="size-4 text-primary" />
               </div>
               <div>
-                <Label className="text-sm font-medium">界面语言</Label>
-                <p className="text-xs text-muted-foreground">选择界面显示语言</p>
+                <Label className="text-sm font-medium">{t('settings.appearance.language')}</Label>
+                <p className="text-xs text-muted-foreground">{t('settings.appearance.languageDesc')}</p>
               </div>
             </div>
             <Select value={language} onValueChange={onLanguageChange}>
@@ -84,10 +84,8 @@ export default function SettingsAppearanceSection({
                 <SelectValue placeholder="选择语言" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="zh-CN">简体中文</SelectItem>
-                <SelectItem value="zh-TW">繁體中文</SelectItem>
-                <SelectItem value="en-US">English</SelectItem>
-                <SelectItem value="ja-JP">日本語</SelectItem>
+                <SelectItem value="zh-CN">{t('settings.appearance.lang.zh-CN')}</SelectItem>
+                <SelectItem value="en-US">{t('settings.appearance.lang.en-US')}</SelectItem>
               </SelectContent>
             </Select>
           </div>

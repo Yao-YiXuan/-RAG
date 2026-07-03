@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { MessageSquare, FileText, Settings, Sparkles } from 'lucide-react';
+import { useI18n } from '@/lib/i18n';
 import {
   Sidebar,
   SidebarContent,
@@ -11,14 +12,15 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 
-const NAV_ITEMS = [
-  { path: '/', label: '首页问答', icon: MessageSquare },
-  { path: '/documents', label: '文档管理', icon: FileText },
-  { path: '/settings', label: '系统设置', icon: Settings },
+const NAV_ITEMS: { path: string; labelKey: 'nav.home' | 'nav.documents' | 'nav.settings'; icon: typeof MessageSquare }[] = [
+  { path: '/', labelKey: 'nav.home', icon: MessageSquare },
+  { path: '/documents', labelKey: 'nav.documents', icon: FileText },
+  { path: '/settings', labelKey: 'nav.settings', icon: Settings },
 ];
 
 export default function AppSidebar() {
   const { pathname } = useLocation();
+  const { t } = useI18n();
 
   return (
     <Sidebar
@@ -32,10 +34,10 @@ export default function AppSidebar() {
           </div>
           <div className="flex-1 min-w-0 group-data-[state=collapsed]:hidden">
             <div className="text-sm font-semibold tracking-wide text-sidebar-foreground truncate">
-              RAG 知识库
+              {t('sidebar.title')}
             </div>
             <div className="text-[11px] text-sidebar-foreground/50 truncate">
-              智能问答系统
+              {t('sidebar.subtitle')}
             </div>
           </div>
         </div>
@@ -53,7 +55,7 @@ export default function AppSidebar() {
 
               return (
                 <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton asChild tooltip={item.label} isActive={isActive}>
+                  <SidebarMenuButton asChild tooltip={t(item.labelKey)} isActive={isActive}>
                     <NavLink
                       to={item.path}
                       end={item.path === '/'}
@@ -61,7 +63,7 @@ export default function AppSidebar() {
                     >
                       <Icon className="size-4 shrink-0" />
                       <span className="group-data-[state=collapsed]:hidden">
-                        {item.label}
+                        {t(item.labelKey)}
                       </span>
                     </NavLink>
                   </SidebarMenuButton>

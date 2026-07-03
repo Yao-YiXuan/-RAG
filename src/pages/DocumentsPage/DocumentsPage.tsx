@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { FileText, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { useI18n } from '@/lib/i18n';
 import { api, DocumentItem as ApiDocumentItem } from '@/lib/api';
 import DocumentFilterSection from './sections/DocumentFilterSection';
 import DocumentUploadSection from './sections/DocumentUploadSection';
@@ -10,6 +11,7 @@ import DocumentListSection from './sections/DocumentListSection';
 import { Button } from '@/components/ui/button';
 
 export default function DocumentsPage() {
+  const { t } = useI18n();
   const [documents, setDocuments] = useState<ApiDocumentItem[]>([]);
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -35,22 +37,22 @@ export default function DocumentsPage() {
   const handleUpload = useCallback(async (file: File) => {
     try {
       await api.documents.upload(file);
-      toast.success('文档上传成功，正在处理...');
+      toast.success(t('toast.uploadSuccess'));
       fetchDocuments();
     } catch (e: any) {
       toast.error('上传失败', { description: e.message });
     }
-  }, [fetchDocuments]);
+  }, [fetchDocuments, t]);
 
   const handleDelete = useCallback(async (id: string) => {
     try {
       await api.documents.delete(id);
-      toast.success('文档已删除');
+      toast.success(t('toast.deleteSuccess'));
       setDocuments(prev => prev.filter(d => d.id !== id));
     } catch (e: any) {
       toast.error('删除失败', { description: e.message });
     }
-  }, []);
+  }, [t]);
 
   return (
     <div className="space-y-6 p-4 md:p-6 lg:p-8">
@@ -67,10 +69,10 @@ export default function DocumentsPage() {
           </div>
           <div>
             <h1 className="text-xl font-semibold tracking-tight text-foreground">
-              文档管理
+              {t('doc.title')}
             </h1>
             <p className="text-sm text-muted-foreground">
-              管理知识库文档，上传、查看和处理状态
+              {t('doc.description')}
             </p>
           </div>
         </div>
@@ -82,7 +84,7 @@ export default function DocumentsPage() {
           className="gap-1.5 text-muted-foreground"
         >
           <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
-          刷新
+          {t('doc.refresh')}
         </Button>
       </motion.div>
 

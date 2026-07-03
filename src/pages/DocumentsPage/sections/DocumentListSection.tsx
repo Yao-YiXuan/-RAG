@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, Trash2, Eye, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { useI18n } from '@/lib/i18n';
+import type { TranslationKey } from '@/lib/i18n';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -25,13 +27,14 @@ interface DocumentListSectionProps {
   loading?: boolean;
 }
 
-const STATUS_CONFIG: Record<DocumentItem['status'], { label: string; variant: 'default' | 'secondary' | 'destructive'; icon: typeof CheckCircle2 }> = {
-  processed: { label: '已处理', variant: 'default', icon: CheckCircle2 },
-  processing: { label: '处理中', variant: 'secondary', icon: Loader2 },
-  failed: { label: '失败', variant: 'destructive', icon: AlertCircle },
+const STATUS_CONFIG: Record<DocumentItem['status'], { labelKey: TranslationKey; variant: 'default' | 'secondary' | 'destructive'; icon: typeof CheckCircle2 }> = {
+  processed: { labelKey: 'doc.status.processed', variant: 'default', icon: CheckCircle2 },
+  processing: { labelKey: 'doc.status.processing', variant: 'secondary', icon: Loader2 },
+  failed: { labelKey: 'doc.status.failed', variant: 'destructive', icon: AlertCircle },
 };
 
 export default function DocumentListSection({ documents, onDelete, loading }: DocumentListSectionProps) {
+  const { t } = useI18n();
   const [deleteTarget, setDeleteTarget] = useState<DocumentItem | null>(null);
 
   const handleConfirmDelete = () => {
@@ -46,7 +49,7 @@ export default function DocumentListSection({ documents, onDelete, loading }: Do
       <Card className="border-border/40 bg-card/60 backdrop-blur-xl">
         <CardContent className="flex flex-col items-center justify-center py-20">
           <Loader2 className="size-10 text-muted-foreground/50 animate-spin mb-4" />
-          <p className="text-sm text-muted-foreground">加载中...</p>
+          <p className="text-sm text-muted-foreground">{t('doc.loading')}</p>
         </CardContent>
       </Card>
     );
@@ -59,8 +62,8 @@ export default function DocumentListSection({ documents, onDelete, loading }: Do
           <div className="mb-4 rounded-full bg-muted/50 p-4">
             <FileText className="size-10 text-muted-foreground/50" />
           </div>
-          <p className="text-sm text-muted-foreground">暂无文档</p>
-          <p className="mt-1 text-xs text-muted-foreground/60">点击上方按钮上传你的第一个文档</p>
+          <p className="text-sm text-muted-foreground">{t('doc.empty.title')}</p>
+          <p className="mt-1 text-xs text-muted-foreground/60">{t('doc.empty.desc')}</p>
         </CardContent>
       </Card>
     );
@@ -74,12 +77,12 @@ export default function DocumentListSection({ documents, onDelete, loading }: Do
             <Table>
               <TableHeader>
                 <TableRow className="border-border/30 hover:bg-transparent">
-                  <TableHead className="whitespace-nowrap text-muted-foreground">文档名称</TableHead>
-                  <TableHead className="whitespace-nowrap text-muted-foreground">上传时间</TableHead>
-                  <TableHead className="whitespace-nowrap text-muted-foreground">处理状态</TableHead>
-                  <TableHead className="whitespace-nowrap text-muted-foreground">文件大小</TableHead>
-                  <TableHead className="whitespace-nowrap text-muted-foreground">类型</TableHead>
-                  <TableHead className="whitespace-nowrap text-right text-muted-foreground">操作</TableHead>
+                  <TableHead className="whitespace-nowrap text-muted-foreground">{t('doc.table.name')}</TableHead>
+                  <TableHead className="whitespace-nowrap text-muted-foreground">{t('doc.table.uploadTime')}</TableHead>
+                  <TableHead className="whitespace-nowrap text-muted-foreground">{t('doc.table.status')}</TableHead>
+                  <TableHead className="whitespace-nowrap text-muted-foreground">{t('doc.table.size')}</TableHead>
+                  <TableHead className="whitespace-nowrap text-muted-foreground">{t('doc.table.type')}</TableHead>
+                  <TableHead className="whitespace-nowrap text-right text-muted-foreground">{t('doc.table.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -116,7 +119,7 @@ export default function DocumentListSection({ documents, onDelete, loading }: Do
                             <StatusIcon
                               className={`size-3 ${doc.status === 'processing' ? 'animate-spin' : ''}`}
                             />
-                            {statusCfg.label}
+                            {t(statusCfg.labelKey)}
                           </Badge>
                         </TableCell>
                         <TableCell className="whitespace-nowrap text-sm text-muted-foreground tabular-nums">
@@ -136,7 +139,7 @@ export default function DocumentListSection({ documents, onDelete, loading }: Do
                               onClick={() => toast.info(`查看文档: ${doc.name}`)}
                             >
                               <Eye className="size-3.5" />
-                              <span className="hidden sm:inline">查看</span>
+                              <span className="hidden sm:inline">{t('doc.table.view')}</span>
                             </Button>
                             <Button
                               variant="ghost"
@@ -145,7 +148,7 @@ export default function DocumentListSection({ documents, onDelete, loading }: Do
                               onClick={() => setDeleteTarget(doc)}
                             >
                               <Trash2 className="size-3.5" />
-                              <span className="hidden sm:inline">删除</span>
+                              <span className="hidden sm:inline">{t('doc.table.delete')}</span>
                             </Button>
                           </div>
                         </TableCell>
@@ -162,20 +165,20 @@ export default function DocumentListSection({ documents, onDelete, loading }: Do
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent className="border-border/40 bg-card/90 backdrop-blur-xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>确认删除</AlertDialogTitle>
+            <AlertDialogTitle>{t('doc.delete.title')}</AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground">
-              确定要删除文档「{deleteTarget?.name}」吗？此操作不可撤销。
+              {t('doc.delete.desc', { name: deleteTarget?.name || '' })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="border-border/40 bg-secondary/50 hover:bg-secondary/70">
-              取消
+              {t('doc.delete.cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              确认删除
+              {t('doc.delete.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

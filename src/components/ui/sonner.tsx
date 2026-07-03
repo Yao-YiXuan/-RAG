@@ -10,15 +10,28 @@ import {
   Loader2Icon,
   XIcon,
 } from 'lucide-react';
-import { useTheme } from 'next-themes';
 import { Toaster as Sonner, type ToasterProps } from 'sonner';
 
 function Toaster({ className, style, icons, ...props }: ToasterProps) {
-  const { theme = 'system' } = useTheme();
+  const [theme, setTheme] = React.useState<'dark' | 'light'>('dark');
+
+  React.useEffect(() => {
+    const updateTheme = () => {
+      const t = document.documentElement.getAttribute('data-theme');
+      setTheme(t === 'light' ? 'light' : 'dark');
+    };
+    updateTheme();
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <Sonner
-      theme={theme as ToasterProps['theme']}
+      theme={theme}
       className={cn('toaster group', className)}
       position="top-center"
       icons={{

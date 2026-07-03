@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
+import { useI18n } from '@/lib/i18n';
 import ChatSection from './sections/ChatSection';
 import ChatInputSection from './sections/ChatInputSection';
 import SuggestionSection from './sections/SuggestionSection';
@@ -15,6 +16,7 @@ export interface ChatMessage {
 }
 
 export default function HomePage() {
+  const { t, lang } = useI18n();
   const [newMessage, setNewMessage] = useState<ChatMessage | null>(null);
   const [aiReply, setAiReply] = useState<ChatMessage | null>(null);
   const conversationIdRef = useRef<string | undefined>(undefined);
@@ -24,7 +26,8 @@ export default function HomePage() {
     if (isSendingRef.current) return;
     isSendingRef.current = true;
 
-    const ts = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+    const locale = lang === 'en-US' ? 'en-US' : 'zh-CN';
+    const ts = new Date().toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
     const userMsg: ChatMessage = {
       id: `user-${Date.now()}`,
       role: 'user',
@@ -52,21 +55,21 @@ export default function HomePage() {
         id: `ai-${Date.now()}`,
         role: 'ai',
         content: res.reply,
-        timestamp: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+        timestamp: new Date().toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }),
         status: 'done',
       });
     } catch (e: any) {
       setAiReply({
         id: `ai-err-${Date.now()}`,
         role: 'ai',
-        content: `抱歉，请求失败: ${e.message || '未知错误'}`,
-        timestamp: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+        content: `${t('chat.error.prefix')}: ${e.message || t('error.network')}`,
+        timestamp: new Date().toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }),
         status: 'done',
       });
     } finally {
       isSendingRef.current = false;
     }
-  }, []);
+  }, [lang, t]);
 
   return (
     <div className="flex flex-col h-full">
@@ -82,11 +85,10 @@ export default function HomePage() {
             <Sparkles className="size-7 text-primary" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground lg:text-3xl">
-            RAG 知识库
+            {t('home.title')}
           </h1>
-          <p className="mt-2 max-w-lg text-sm text-muted-foreground leading-relaxed">
-            基于检索增强生成（RAG）的智能文档问答系统。
-            上传你的文档，AI 将基于知识库内容为你提供精准、可溯源的回答。
+          <p className="mt-2 max-w-lg text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+            {t('home.subtitle')}
           </p>
         </motion.div>
       </div>

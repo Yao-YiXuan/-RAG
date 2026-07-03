@@ -87,6 +87,37 @@
   --spacing: 0.25rem;
 }
 
+/* Light 主题 */
+[data-theme="light"] {
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(210 30% 12%);
+  --card: hsl(210 20% 98%);
+  --card-foreground: hsl(210 30% 12%);
+  --popover: hsl(210 20% 98%);
+  --popover-foreground: hsl(210 30% 12%);
+  --primary: hsl(195 75% 40%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(210 15% 92%);
+  --secondary-foreground: hsl(210 30% 20%);
+  --muted: hsl(210 15% 92%);
+  --muted-foreground: hsl(210 10% 40%);
+  --accent: hsl(210 15% 92%);
+  --accent-foreground: hsl(210 30% 20%);
+  --destructive: hsl(0 84% 50%);
+  --border: hsl(210 15% 85%);
+  --input: hsl(210 15% 85%);
+  --sidebar: hsl(210 20% 96%);
+  --sidebar-foreground: hsl(210 30% 15%);
+  --sidebar-primary: hsl(195 75% 40%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(210 15% 88%);
+  --sidebar-accent-foreground: hsl(210 30% 20%);
+  --sidebar-border: hsl(210 15% 82%);
+  --sidebar-ring: hsl(195 75% 52%);
+  --elevate-1: rgba(0,0,0, .03);
+  --elevate-2: rgba(0,0,0, .06);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

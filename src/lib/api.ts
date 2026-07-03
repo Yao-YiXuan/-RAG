@@ -1,15 +1,23 @@
 const API_BASE = '/api';
+const TIMEOUT_MS = 15_000;
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${url}`, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  });
-  if (!res.ok) {
-    const detail = await res.text();
-    throw new Error(detail || `请求失败 (${res.status})`);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  try {
+    const res = await fetch(`${API_BASE}${url}`, {
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      ...options,
+    });
+    if (!res.ok) {
+      const detail = await res.text();
+      throw new Error(detail || `请求失败 (${res.status})`);
+    }
+    return res.json();
+  } finally {
+    clearTimeout(timer);
   }
-  return res.json();
 }
 
 export interface SourceRef {
@@ -70,6 +78,11 @@ export interface SystemSettings {
   language: string;
 }
 
+interface TestConnectionResponse {
+  success: boolean;
+  message: string;
+}
+
 export const api = {
   chat: {
     send: (message: string, conversationId?: string) =>
@@ -98,6 +111,16 @@ export const api = {
       request<{ success: boolean }>('/settings', {
         method: 'PUT',
         body: JSON.stringify(settings),
+      }),
+    testLLM: (apiKey: string, baseUrl: string, modelName: string) =>
+      request<TestConnectionResponse>('/settings/test-llm', {
+        method: 'POST',
+        body: JSON.stringify({ api_key: apiKey, base_url: baseUrl, model_name: modelName }),
+      }),
+    testEmbedding: (apiKey: string, baseUrl: string, modelName: string) =>
+      request<TestConnectionResponse>('/settings/test-embedding', {
+        method: 'POST',
+        body: JSON.stringify({ api_key: apiKey, base_url: baseUrl, model_name: modelName }),
       }),
   },
 };

@@ -3,6 +3,7 @@ import { SlidersHorizontal } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
+import { useI18n } from '@/lib/i18n';
 
 interface SettingsRetrievalSectionProps {
   retrievalCount: number;
@@ -17,6 +18,8 @@ export default memo(function SettingsRetrievalSection({
   onRetrievalCountChange,
   onSimilarityThresholdChange,
 }: SettingsRetrievalSectionProps) {
+  const { t } = useI18n();
+
   return (
     <Card className="border-border/40 bg-card/60 backdrop-blur-xl shadow-sm">
       <CardHeader className="pb-4">
@@ -25,9 +28,9 @@ export default memo(function SettingsRetrievalSection({
             <SlidersHorizontal className="size-4 text-primary" />
           </div>
           <div>
-            <CardTitle className="text-base font-semibold">检索设置</CardTitle>
+            <CardTitle className="text-base font-semibold">{t('settings.retrieval.title')}</CardTitle>
             <CardDescription className="text-xs text-muted-foreground">
-              调整知识库检索的相关参数
+              {t('settings.retrieval.desc')}
             </CardDescription>
           </div>
         </div>
@@ -36,7 +39,7 @@ export default memo(function SettingsRetrievalSection({
         {/* 检索数量 */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label className="text-sm font-medium">检索数量</Label>
+            <Label className="text-sm font-medium">{t('settings.retrieval.count')}</Label>
             <span className="min-w-[3rem] text-right text-sm font-mono tabular-nums text-primary">
               {retrievalCount}
             </span>
@@ -58,7 +61,7 @@ export default memo(function SettingsRetrievalSection({
         {/* 相似度阈值 */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label className="text-sm font-medium">相似度阈值</Label>
+            <Label className="text-sm font-medium">{t('settings.retrieval.threshold')}</Label>
             <span className="min-w-[3rem] text-right text-sm font-mono tabular-nums text-primary">
               {similarityThreshold.toFixed(2)}
             </span>

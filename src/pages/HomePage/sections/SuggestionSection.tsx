@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Sparkles, FileText, Search, Code, Terminal } from 'lucide-react';
+import { useI18n } from '@/lib/i18n';
 import { MOCK_SUGGESTION_QUESTIONS } from '@/data/suggestion-question';
 
 interface SuggestionSectionProps {
@@ -15,10 +16,28 @@ const CATEGORY_ICONS: Record<string, React.ComponentType<{ className?: string }>
 };
 
 export default function SuggestionSection({ onSend }: SuggestionSectionProps) {
+  const { t } = useI18n();
+
+  const categoryLabels: Record<string, string> = {
+    '文档摘要': t('suggestion.category.doc_summary'),
+    '技术分析': t('suggestion.category.tech_analysis'),
+    '数据洞察': t('suggestion.category.data_insight'),
+    '接口查询': t('suggestion.category.api_query'),
+    '运维指南': t('suggestion.category.ops_guide'),
+  };
+
+  const questionTexts: Record<string, string> = {
+    '1': t('question.example1'),
+    '2': t('question.example2'),
+    '3': t('question.example3'),
+    '4': t('question.example4'),
+    '5': t('question.example5'),
+  };
+
   return (
     <div className="w-full">
       <p className="text-xs font-medium text-muted-foreground mb-3 tracking-wide uppercase">
-        试试这些问题
+        {t('suggestion.title')}
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
         {MOCK_SUGGESTION_QUESTIONS.map((item, i) => {
@@ -41,10 +60,10 @@ export default function SuggestionSection({ onSend }: SuggestionSectionProps) {
               </span>
               <div className="min-w-0 flex-1">
                 <span className="block text-xs font-medium text-muted-foreground mb-0.5">
-                  {item.category}
+                  {categoryLabels[item.category] || item.category}
                 </span>
                 <span className="block text-sm text-foreground/85 leading-snug transition-colors duration-200 group-hover:text-foreground">
-                  {item.text}
+                  {questionTexts[item.id] || item.text}
                 </span>
               </div>
             </motion.button>

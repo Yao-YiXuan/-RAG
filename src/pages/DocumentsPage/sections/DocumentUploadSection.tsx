@@ -1,6 +1,7 @@
 import { useState, useRef, type FormEvent } from 'react';
 import { Upload, FileText, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useI18n } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -11,6 +12,7 @@ interface DocumentUploadSectionProps {
 const ALLOWED_TYPES = '.pdf,.doc,.docx,.md,.txt,.csv';
 
 export default function DocumentUploadSection({ onUpload }: DocumentUploadSectionProps) {
+  const { t } = useI18n();
   const [fileName, setFileName] = useState('');
   const [fileData, setFileData] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -30,7 +32,7 @@ export default function DocumentUploadSection({ onUpload }: DocumentUploadSectio
 
   const handleUpload = async () => {
     if (!fileData) {
-      toast.error('请先选择文件');
+      toast.error(t('doc.upload.selectFileFirst'));
       return;
     }
 
@@ -62,14 +64,14 @@ export default function DocumentUploadSection({ onUpload }: DocumentUploadSectio
         className="h-11 gap-2 border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 hover:border-primary/50 backdrop-blur-sm transition-all duration-300"
       >
         <FileText className="size-4" />
-        选择文件
+        {t('doc.upload.select')}
       </Button>
 
       <div className="flex-1 flex items-center gap-2">
         <Input
           value={fileName}
           readOnly
-          placeholder="未选择文件（支持 PDF、DOCX、MD、TXT 等格式）"
+          placeholder={t('doc.upload.placeholder')}
           className="h-11 bg-card/50 border-border/50 text-muted-foreground placeholder:text-muted-foreground/50 backdrop-blur-sm cursor-default"
         />
       </div>
@@ -82,12 +84,12 @@ export default function DocumentUploadSection({ onUpload }: DocumentUploadSectio
         {isUploading ? (
           <>
             <Loader2 className="size-4 animate-spin" />
-            上传中...
+            {t('doc.upload.uploading')}
           </>
         ) : (
           <>
             <Upload className="size-4" />
-            上传文档
+            {t('doc.upload.btn')}
           </>
         )}
       </Button>

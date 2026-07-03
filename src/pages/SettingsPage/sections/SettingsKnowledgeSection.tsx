@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { MOCK_SYSTEM_SETTINGS } from '@/data/system-settings';
+import { useI18n } from '@/lib/i18n';
 
 interface SettingsKnowledgeSectionProps {
   knowledgeBaseName: string;
@@ -25,12 +26,6 @@ interface SettingsKnowledgeSectionProps {
   onChunkSizeChange: (value: number) => void;
 }
 
-const CHUNK_STRATEGY_OPTIONS: { value: 'fixed' | 'semantic' | 'recursive'; label: string; desc: string }[] = [
-  { value: 'fixed', label: '固定大小', desc: '按固定字符数切分，简单高效' },
-  { value: 'semantic', label: '语义分块', desc: '基于语义边界智能切分，保留上下文完整性' },
-  { value: 'recursive', label: '递归分块', desc: '递归使用分隔符分层切分，兼顾结构与语义' },
-];
-
 export default function SettingsKnowledgeSection({
   knowledgeBaseName,
   knowledgeBaseDescription,
@@ -42,6 +37,13 @@ export default function SettingsKnowledgeSection({
   onChunkSizeChange,
 }: SettingsKnowledgeSectionProps) {
   const [chunkSizeInput, setChunkSizeInput] = useState(String(chunkSize));
+  const { t } = useI18n();
+
+  const CHUNK_STRATEGY_OPTIONS: { value: 'fixed' | 'semantic' | 'recursive'; label: string; desc: string }[] = [
+    { value: 'fixed', label: t('settings.knowledge.strategy.fixed'), desc: t('settings.knowledge.strategy.fixedDesc') },
+    { value: 'semantic', label: t('settings.knowledge.strategy.semantic'), desc: t('settings.knowledge.strategy.semanticDesc') },
+    { value: 'recursive', label: t('settings.knowledge.strategy.recursive'), desc: t('settings.knowledge.strategy.recursiveDesc') },
+  ];
 
   const handleChunkSizeBlur = () => {
     const parsed = parseInt(chunkSizeInput, 10);
@@ -69,8 +71,8 @@ export default function SettingsKnowledgeSection({
               <Database className="size-4 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-base font-semibold">知识库设置</CardTitle>
-              <CardDescription className="text-xs">配置知识库基本信息与文档处理策略</CardDescription>
+              <CardTitle className="text-base font-semibold">{t('settings.knowledge.title')}</CardTitle>
+              <CardDescription className="text-xs">{t('settings.knowledge.desc')}</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -79,7 +81,7 @@ export default function SettingsKnowledgeSection({
           <div className="space-y-2">
             <Label htmlFor="kb-name" className="flex items-center gap-1.5 text-sm">
               <FileText className="size-3.5 text-muted-foreground" />
-              知识库名称
+              {t('settings.knowledge.baseName')}
             </Label>
             <Input
               id="kb-name"
@@ -94,7 +96,7 @@ export default function SettingsKnowledgeSection({
           <div className="space-y-2">
             <Label htmlFor="kb-desc" className="flex items-center gap-1.5 text-sm">
               <FileText className="size-3.5 text-muted-foreground" />
-              知识库描述
+              {t('settings.knowledge.baseDesc')}
             </Label>
             <Textarea
               id="kb-desc"
@@ -110,7 +112,7 @@ export default function SettingsKnowledgeSection({
           <div className="space-y-2">
             <Label className="flex items-center gap-1.5 text-sm">
               <Hash className="size-3.5 text-muted-foreground" />
-              分块策略
+              {t('settings.knowledge.chunkStrategy')}
             </Label>
             <Select
               value={chunkStrategy}
@@ -136,7 +138,7 @@ export default function SettingsKnowledgeSection({
           <div className="space-y-2">
             <Label htmlFor="chunk-size" className="flex items-center gap-1.5 text-sm">
               <Hash className="size-3.5 text-muted-foreground" />
-              分块大小
+              {t('settings.knowledge.chunkSize')}
               <span className="ml-auto text-xs text-muted-foreground tabular-nums">
                 {chunkSize} 字符
               </span>

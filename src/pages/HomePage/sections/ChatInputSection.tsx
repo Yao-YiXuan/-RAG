@@ -1,5 +1,6 @@
 import { useState, useRef, type FormEvent, type KeyboardEvent } from 'react';
 import { Send, Sparkles } from 'lucide-react';
+import { useI18n } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
@@ -9,6 +10,7 @@ interface ChatInputSectionProps {
 }
 
 export default function ChatInputSection({ onSend }: ChatInputSectionProps) {
+  const { t } = useI18n();
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -53,7 +55,7 @@ export default function ChatInputSection({ onSend }: ChatInputSectionProps) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="输入你的问题，按 Enter 发送..."
+              placeholder={t('chat.placeholder')}
               rows={1}
               className="min-h-[44px] max-h-[120px] resize-none border-0 bg-transparent px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus-visible:ring-0 focus-visible:ring-offset-0"
             />
@@ -77,8 +79,8 @@ export default function ChatInputSection({ onSend }: ChatInputSectionProps) {
       </div>
 
       <p className="mt-2 text-center text-xs text-muted-foreground/50">
-        按 <kbd className="rounded border border-border/50 bg-muted/50 px-1.5 py-0.5 text-[10px] font-mono">Enter</kbd> 发送，
-        <kbd className="rounded border border-border/50 bg-muted/50 px-1.5 py-0.5 text-[10px] font-mono">Shift + Enter</kbd> 换行
+        按 <kbd className="rounded border border-border/50 bg-muted/50 px-1.5 py-0.5 text-[10px] font-mono">Enter</kbd> {t('chat.enter')}，
+        <kbd className="rounded border border-border/50 bg-muted/50 px-1.5 py-0.5 text-[10px] font-mono">Shift + Enter</kbd> {t('chat.shiftEnter')}
       </p>
     </form>
   );

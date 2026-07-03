@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, User, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18n';
 import type { ChatMessage } from '../HomePage';
 
 interface ChatSectionProps {
@@ -10,6 +11,7 @@ interface ChatSectionProps {
 }
 
 export default function ChatSection({ newMessage, aiReply }: ChatSectionProps) {
+  const { t } = useI18n();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -54,10 +56,10 @@ export default function ChatSection({ newMessage, aiReply }: ChatSectionProps) {
             <Sparkles className="size-8 text-primary" />
           </div>
           <h2 className="text-xl font-semibold text-foreground mb-2">
-            开始提问
+            {t('home.welcome.title')}
           </h2>
           <p className="text-sm text-muted-foreground max-w-md">
-            在下方输入你的问题，AI将基于知识库文档为你提供精准回答
+            {t('home.welcome.desc')}
           </p>
         </motion.div>
       )}
@@ -92,7 +94,7 @@ export default function ChatSection({ newMessage, aiReply }: ChatSectionProps) {
               >
                 {msg.status === 'thinking' ? (
                   <div className="flex items-center gap-1.5">
-                    <span className="text-sm text-muted-foreground">思考中</span>
+                    <span className="text-sm text-muted-foreground">{t('chat.thinking')}</span>
                     <span className="flex gap-1">
                       <motion.span
                         className="size-1.5 rounded-full bg-primary"
@@ -112,19 +114,7 @@ export default function ChatSection({ newMessage, aiReply }: ChatSectionProps) {
                     </span>
                   </div>
                 ) : (
-                  <>
-                    <p className="whitespace-pre-wrap break-words">{msg.content}</p>
-                    {msg.timestamp && (
-                      <span
-                        className={cn(
-                          'block text-[10px] mt-1.5',
-                          isUser ? 'text-primary-foreground/60' : 'text-muted-foreground',
-                        )}
-                      >
-                        {msg.timestamp}
-                      </span>
-                    )}
-                  </>
+                  <span className="whitespace-pre-wrap">{msg.content}</span>
                 )}
               </div>
 
@@ -138,7 +128,6 @@ export default function ChatSection({ newMessage, aiReply }: ChatSectionProps) {
           );
         })}
       </AnimatePresence>
-
       <div ref={bottomRef} />
     </div>
   );

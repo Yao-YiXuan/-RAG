@@ -2,9 +2,11 @@ import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Cpu, BrainCircuit, Eye, EyeOff, Zap, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { api } from '@/lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/lib/i18n';
 
 interface SettingsModelSectionProps {
   // LLM
@@ -41,42 +43,65 @@ export default function SettingsModelSection({
   const [showEmbeddingKey, setShowEmbeddingKey] = useState(false);
   const [testingLLM, setTestingLLM] = useState(false);
   const [testingEmbedding, setTestingEmbedding] = useState(false);
+  const { t } = useI18n();
 
   const handleTestLLM = useCallback(async () => {
+    console.log('[test] LLM test clicked', { llmApiKey, llmBaseUrl, llmModelName });
     setTestingLLM(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setTestingLLM(false);
-    const ok = Math.random() > 0.3;
-    if (ok) {
-      toast.success('LLM 连接测试成功', {
-        description: 'API 响应正常，模型可正常调用',
-        icon: <CheckCircle className="size-4 text-success" />,
+    try {
+      const res = await api.settings.testLLM(
+        llmApiKey,
+        llmBaseUrl,
+        llmModelName,
+      );
+      console.log('[test] LLM result:', res);
+      if (res.success) {
+        toast.success(t('settings.model.testLLMSuccess'), {
+          description: res.message,
+        });
+      } else {
+        toast.error(t('settings.model.testLLMFail'), {
+          description: res.message,
+        });
+      }
+    } catch (e: any) {
+      console.error('[test] LLM error:', e);
+      toast.error(t('settings.model.testLLMFail'), {
+        description: e.message || t('error.network'),
       });
-    } else {
-      toast.error('LLM 连接测试失败', {
-        description: '请检查 API Key 和 Base URL 是否正确',
-        icon: <XCircle className="size-4 text-destructive" />,
-      });
+    } finally {
+      setTestingLLM(false);
     }
-  }, []);
+  }, [llmApiKey, llmBaseUrl, llmModelName, t]);
 
   const handleTestEmbedding = useCallback(async () => {
+    console.log('[test] Embedding test clicked', { embeddingApiKey, embeddingBaseUrl, embeddingModelName });
     setTestingEmbedding(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setTestingEmbedding(false);
-    const ok = Math.random() > 0.3;
-    if (ok) {
-      toast.success('Embedding 连接测试成功', {
-        description: 'API 响应正常，向量模型可正常调用',
-        icon: <CheckCircle className="size-4 text-success" />,
+    try {
+      const res = await api.settings.testEmbedding(
+        embeddingApiKey,
+        embeddingBaseUrl,
+        embeddingModelName,
+      );
+      console.log('[test] Embedding result:', res);
+      if (res.success) {
+        toast.success(t('settings.model.testEmbeddingSuccess'), {
+          description: res.message,
+        });
+      } else {
+        toast.error(t('settings.model.testEmbeddingFail'), {
+          description: res.message,
+        });
+      }
+    } catch (e: any) {
+      console.error('[test] Embedding error:', e);
+      toast.error(t('settings.model.testEmbeddingFail'), {
+        description: e.message || t('error.network'),
       });
-    } else {
-      toast.error('Embedding 连接测试失败', {
-        description: '请检查 API Key 和 Base URL 是否正确',
-        icon: <XCircle className="size-4 text-destructive" />,
-      });
+    } finally {
+      setTestingEmbedding(false);
     }
-  }, []);
+  }, [embeddingApiKey, embeddingBaseUrl, embeddingModelName, t]);
 
   return (
     <motion.div
@@ -93,8 +118,8 @@ export default function SettingsModelSection({
                 <Cpu className="size-4 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-base font-semibold">模型配置</CardTitle>
-                <CardDescription className="text-xs">配置大语言模型和向量模型的连接参数</CardDescription>
+                <CardTitle className="text-base font-semibold">{t('settings.model.title')}</CardTitle>
+                <CardDescription className="text-xs">{t('settings.model.desc')}</CardDescription>
               </div>
             </div>
           </div>
@@ -106,7 +131,7 @@ export default function SettingsModelSection({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BrainCircuit className="size-4 text-primary/70" />
-                <span className="text-sm font-semibold text-foreground/85">LLM 大语言模型</span>
+                <span className="text-sm font-semibold text-foreground/85">{t('settings.model.llm')}</span>
               </div>
               <Button
                 variant="outline"
@@ -120,13 +145,13 @@ export default function SettingsModelSection({
                 ) : (
                   <Zap className="size-3" />
                 )}
-                {testingLLM ? '测试中...' : '测试连接'}
+                {testingLLM ? t('settings.model.testing') : t('settings.model.test')}
               </Button>
             </div>
 
             {/* LLM API Key */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-foreground/70">LLM API Key</label>
+              <label className="text-xs font-medium text-foreground/70">LLM {t('settings.model.apiKey')}</label>
               <div className="relative">
                 <Input
                   type={showLLMKey ? 'text' : 'password'}
@@ -141,19 +166,19 @@ export default function SettingsModelSection({
                   size="icon"
                   className="!absolute right-1 top-1/2 z-20 h-7 w-7 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   onClick={() => setShowLLMKey(!showLLMKey)}
-                  aria-label={showLLMKey ? '隐藏' : '显示'}
+                  aria-label={showLLMKey ? t('settings.model.hide') : t('settings.model.show')}
                 >
                   {showLLMKey ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
                 </Button>
               </div>
               <p className="text-[11px] text-muted-foreground/60 pl-0.5">
-                从模型服务商（如 OpenAI、DeepSeek）控制台获取 API Key
+                {t('settings.model.apiKeyDesc')}
               </p>
             </div>
 
             {/* LLM API Base URL */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-foreground/70">LLM API Base URL</label>
+              <label className="text-xs font-medium text-foreground/70">LLM {t('settings.model.baseUrl')}</label>
               <Input
                 type="text"
                 value={llmBaseUrl}
@@ -162,13 +187,13 @@ export default function SettingsModelSection({
                 className="h-10 bg-background/50 border-border/50 text-sm backdrop-blur-sm hover:border-primary/30 focus-visible:border-primary/50 transition-colors font-mono"
               />
               <p className="text-[11px] text-muted-foreground/60 pl-0.5">
-                API 端点地址，需兼容 OpenAI 格式；使用代理时填写代理地址
+                {t('settings.model.baseUrlDesc')}
               </p>
             </div>
 
             {/* LLM 模型名称 */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-foreground/70">LLM 模型名称</label>
+              <label className="text-xs font-medium text-foreground/70">LLM {t('settings.model.modelName')}</label>
               <Input
                 type="text"
                 value={llmModelName}
@@ -177,7 +202,7 @@ export default function SettingsModelSection({
                 className="h-10 bg-background/50 border-border/50 text-sm backdrop-blur-sm hover:border-primary/30 focus-visible:border-primary/50 transition-colors"
               />
               <p className="text-[11px] text-muted-foreground/60 pl-0.5">
-                填写模型 ID 或名称，确保与 API 端点支持的模型一致
+                {t('settings.model.modelNameDesc')}
               </p>
             </div>
           </div>
@@ -187,7 +212,7 @@ export default function SettingsModelSection({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Cpu className="size-4 text-primary/70" />
-                <span className="text-sm font-semibold text-foreground/85">Embedding 向量模型</span>
+                <span className="text-sm font-semibold text-foreground/85">{t('settings.model.embedding')}</span>
               </div>
               <Button
                 variant="outline"
@@ -201,13 +226,13 @@ export default function SettingsModelSection({
                 ) : (
                   <Zap className="size-3" />
                 )}
-                {testingEmbedding ? '测试中...' : '测试连接'}
+                {testingEmbedding ? t('settings.model.testing') : t('settings.model.test')}
               </Button>
             </div>
 
             {/* Embedding API Key */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-foreground/70">Embedding API Key</label>
+              <label className="text-xs font-medium text-foreground/70">Embedding {t('settings.model.apiKey')}</label>
               <div className="relative">
                 <Input
                   type={showEmbeddingKey ? 'text' : 'password'}
@@ -222,19 +247,19 @@ export default function SettingsModelSection({
                   size="icon"
                   className="!absolute right-1 top-1/2 z-20 h-7 w-7 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   onClick={() => setShowEmbeddingKey(!showEmbeddingKey)}
-                  aria-label={showEmbeddingKey ? '隐藏' : '显示'}
+                  aria-label={showEmbeddingKey ? t('settings.model.hide') : t('settings.model.show')}
                 >
                   {showEmbeddingKey ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
                 </Button>
               </div>
               <p className="text-[11px] text-muted-foreground/60 pl-0.5">
-                通常与 LLM 使用同一 API Key，也可单独配置
+                {t('settings.model.apiKeyDescEmbedding')}
               </p>
             </div>
 
             {/* Embedding API Base URL */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-foreground/70">Embedding API Base URL</label>
+              <label className="text-xs font-medium text-foreground/70">Embedding {t('settings.model.baseUrl')}</label>
               <Input
                 type="text"
                 value={embeddingBaseUrl}
@@ -243,13 +268,13 @@ export default function SettingsModelSection({
                 className="h-10 bg-background/50 border-border/50 text-sm backdrop-blur-sm hover:border-primary/30 focus-visible:border-primary/50 transition-colors font-mono"
               />
               <p className="text-[11px] text-muted-foreground/60 pl-0.5">
-                向量化 API 端点地址，通常与 LLM Base URL 相同
+                {t('settings.model.baseUrlDescEmbedding')}
               </p>
             </div>
 
             {/* Embedding 模型名称 */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-foreground/70">Embedding 模型名称</label>
+              <label className="text-xs font-medium text-foreground/70">Embedding {t('settings.model.modelName')}</label>
               <Input
                 type="text"
                 value={embeddingModelName}
@@ -258,7 +283,7 @@ export default function SettingsModelSection({
                 className="h-10 bg-background/50 border-border/50 text-sm backdrop-blur-sm hover:border-primary/30 focus-visible:border-primary/50 transition-colors"
               />
               <p className="text-[11px] text-muted-foreground/60 pl-0.5">
-                填写 Embedding 模型 ID，用于文档向量化和语义检索
+                {t('settings.model.modelNameDescEmbedding')}
               </p>
             </div>
           </div>
