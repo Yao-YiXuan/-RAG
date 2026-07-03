@@ -1,0 +1,16 @@
+node_modules
+.git
+.env
+*.md
+.vscode
+.spark
+.githooks
+scripts
+shared
+public
+plan
+
+# Docker
+docker-compose.yml
+.dockerignore
+nginx
