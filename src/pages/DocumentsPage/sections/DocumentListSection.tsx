@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, Trash2, Eye, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
+import { FileText, Trash2, Eye, AlertCircle, Loader2, CheckCircle2, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useI18n } from '@/lib/i18n';
 import type { TranslationKey } from '@/lib/i18n';
+import { api } from '@/lib/api';
+import type { DocumentItem } from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -19,7 +21,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import type { DocumentItem } from '@/lib/api';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface DocumentListSectionProps {
   documents: DocumentItem[];
@@ -36,6 +43,23 @@ const STATUS_CONFIG: Record<DocumentItem['status'], { labelKey: TranslationKey; 
 export default function DocumentListSection({ documents, onDelete, loading }: DocumentListSectionProps) {
   const { t } = useI18n();
   const [deleteTarget, setDeleteTarget] = useState<DocumentItem | null>(null);
+  const [viewTarget, setViewTarget] = useState<DocumentItem | null>(null);
+  const [viewContent, setViewContent] = useState<string | null>(null);
+  const [isViewLoading, setIsViewLoading] = useState(false);
+
+  const handleView = async (doc: DocumentItem) => {
+    setViewTarget(doc);
+    setViewContent(null);
+    setIsViewLoading(true);
+    try {
+      const res = await api.documents.getContent(doc.id);
+      setViewContent(res.content);
+    } catch (e: any) {
+      setViewContent(`读取失败: ${e.message}`);
+    } finally {
+      setIsViewLoading(false);
+    }
+  };
 
   const handleConfirmDelete = () => {
     if (deleteTarget) {
@@ -136,7 +160,7 @@ export default function DocumentListSection({ documents, onDelete, loading }: Do
                               variant="ghost"
                               size="sm"
                               className="h-8 gap-1.5 text-muted-foreground hover:text-foreground"
-                              onClick={() => toast.info(`查看文档: ${doc.name}`)}
+                              onClick={() => handleView(doc)}
                             >
                               <Eye className="size-3.5" />
                               <span className="hidden sm:inline">{t('doc.table.view')}</span>
@@ -162,6 +186,7 @@ export default function DocumentListSection({ documents, onDelete, loading }: Do
         </CardContent>
       </Card>
 
+      {/* 删除确认对话框 */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent className="border-border/40 bg-card/90 backdrop-blur-xl">
           <AlertDialogHeader>
@@ -183,6 +208,29 @@ export default function DocumentListSection({ documents, onDelete, loading }: Do
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 查看文档内容对话框 */}
+      <Dialog open={!!viewTarget} onOpenChange={(open) => !open && setViewTarget(null)}>
+        <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col border-border/40 bg-card/90 backdrop-blur-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="size-4 text-primary" />
+              {viewTarget?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto min-h-0">
+            {isViewLoading ? (
+              <div className="flex items-center justify-center py-16">
+                <Loader2 className="size-8 text-primary animate-spin" />
+              </div>
+            ) : (
+              <pre className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap font-sans">
+                {viewContent || ''}
+              </pre>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

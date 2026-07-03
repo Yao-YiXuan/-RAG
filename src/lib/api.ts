@@ -61,6 +61,13 @@ export interface DocumentUploadResponse {
   status: string;
 }
 
+export interface DocumentContent {
+  id: string;
+  name: string;
+  content: string;
+  type: string;
+}
+
 export interface SystemSettings {
   llm_api_key: string;
   llm_base_url: string;
@@ -104,6 +111,7 @@ export const api = {
       return res.json() as Promise<DocumentUploadResponse>;
     },
     delete: (id: string) => request<{ success: boolean }>(`/documents/${id}`, { method: 'DELETE' }),
+    getContent: (id: string) => request<DocumentContent>(`/documents/${id}/content`),
   },
   settings: {
     get: () => request<SystemSettings>('/settings'),

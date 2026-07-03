@@ -55,6 +55,13 @@ class DocumentUploadResponse(BaseModel):
     status: str = "processing"
 
 
+class DocumentContentResponse(BaseModel):
+    id: str
+    name: str
+    content: str
+    type: str
+
+
 class DeleteResponse(BaseModel):
     success: bool
 

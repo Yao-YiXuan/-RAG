@@ -5,9 +5,9 @@ from fastapi import APIRouter, Depends, UploadFile, File, Query, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db, Document
-from app.models.schemas import DocumentItem, DocumentUploadResponse, DeleteResponse
+from app.models.schemas import DocumentItem, DocumentUploadResponse, DocumentContentResponse, DeleteResponse
 from app.config import settings
-from app.core.document_processor import process_document_async
+from app.core.document_processor import process_document_async, parse_file
 from app.core.vector_store import vector_store
 
 router = APIRouter(prefix="/api/documents", tags=["文档"])
@@ -107,6 +107,29 @@ async def upload_document(file: UploadFile = File(...), db: Session = Depends(ge
     )
 
     return DocumentUploadResponse(id=doc_id, name=doc.name)
+
+
+@router.get("/{document_id}/content", response_model=DocumentContentResponse)
+def get_document_content(document_id: str, db: Session = Depends(get_db)):
+    """获取文档内容。"""
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="文档不存在")
+
+    if not doc.file_path or not os.path.exists(doc.file_path):
+        raise HTTPException(status_code=404, detail="文档文件不存在")
+
+    try:
+        content = parse_file(doc.file_path, doc.type)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"读取文档失败: {str(e)}")
+
+    return DocumentContentResponse(
+        id=doc.id,
+        name=doc.name,
+        content=content,
+        type=doc.type,
+    )
 
 
 @router.delete("/{document_id}", response_model=DeleteResponse)
