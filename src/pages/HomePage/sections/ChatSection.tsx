@@ -1,18 +1,17 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, User, Sparkles } from 'lucide-react';
+import { Bot, User, Sparkles, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import type { ChatMessage } from '../HomePage';
 
 interface ChatSectionProps {
-  newMessage?: ChatMessage | null;
-  aiReply?: ChatMessage | null;
+  messages: ChatMessage[];
+  isLoading?: boolean;
 }
 
-export default function ChatSection({ newMessage, aiReply }: ChatSectionProps) {
+export default function ChatSection({ messages, isLoading }: ChatSectionProps) {
   const { t } = useI18n();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback(() => {
@@ -21,31 +20,19 @@ export default function ChatSection({ newMessage, aiReply }: ChatSectionProps) {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, aiReply, scrollToBottom]);
+  }, [messages, scrollToBottom]);
 
-  // 追加用户新消息
-  useEffect(() => {
-    if (newMessage) {
-      setMessages(prev => [...prev, newMessage]);
-    }
-  }, [newMessage]);
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <Loader2 className="size-6 text-primary animate-spin" />
+      </div>
+    );
+  }
 
-  // 处理 AI 回复（thinking 状态或最终回复）
-  useEffect(() => {
-    if (!aiReply) return;
-    setMessages(prev => {
-      // 如果最后一条是 thinking，替换掉它
-      const last = prev[prev.length - 1];
-      if (last?.status === 'thinking') {
-        return [...prev.slice(0, -1), aiReply];
-      }
-      return [...prev, aiReply];
-    });
-  }, [aiReply]);
-
-  return (
-    <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 scrollbar-thin">
-      {messages.length === 0 && (
+  if (messages.length === 0) {
+    return (
+      <div className="flex-1 overflow-y-auto px-4 py-6 scrollbar-thin">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -62,8 +49,12 @@ export default function ChatSection({ newMessage, aiReply }: ChatSectionProps) {
             {t('home.welcome.desc')}
           </p>
         </motion.div>
-      )}
+      </div>
+    );
+  }
 
+  return (
+    <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 scrollbar-thin">
       <AnimatePresence mode="popLayout">
         {messages.map((msg) => {
           const isUser = msg.role === 'user';
