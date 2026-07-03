@@ -73,7 +73,7 @@ class SystemSettings(BaseModel):
     chunk_strategy: str = "semantic"
     chunk_size: int = 512
     retrieval_count: int = 5
-    similarity_threshold: float = 0.75
+    similarity_threshold: float = 0.45
     theme: str = "dark"
     language: str = "zh-CN"
 

@@ -33,7 +33,7 @@ DEFAULT_SETTINGS = {
     "chunk_strategy": "semantic",
     "chunk_size": "512",
     "retrieval_count": "5",
-    "similarity_threshold": "0.75",
+    "similarity_threshold": "0.45",
     "theme": "dark",
     "language": "zh-CN",
 }

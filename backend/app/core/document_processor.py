@@ -1,11 +1,14 @@
 import os
 import re
+import logging
 import threading
 from typing import Callable
 
 from app.core.llm_client import llm_client
 from app.core.vector_store import vector_store
 from app.database import SessionLocal, Document
+
+logger = logging.getLogger(__name__)
 
 
 def parse_file(file_path: str, file_type: str) -> str:
@@ -102,28 +105,39 @@ def _process_document_sync(doc_id: str, file_path: str, file_type: str, file_nam
     """同步处理文档（在后台线程运行）。"""
     db = SessionLocal()
     try:
+        logger.info("开始处理文档: %s (类型=%s, 策略=%s, 块大小=%d)", file_name, file_type, strategy, chunk_size)
+
         # 解析
         text = parse_file(file_path, file_type)
         if not text.strip():
+            logger.warning("文档解析结果为空: %s", file_name)
             _update_doc_status(db, doc_id, "failed")
             return
+        logger.info("文档解析完成: %s, 文本长度=%d", file_name, len(text))
 
         # 分块
         chunks = chunk_text(text, strategy, chunk_size)
         if not chunks:
+            logger.warning("分块结果为空: %s", file_name)
             _update_doc_status(db, doc_id, "failed")
             return
+        logger.info("分块完成: %s, 分块数=%d", file_name, len(chunks))
 
         # 嵌入
+        logger.info("开始生成向量嵌入: %s, 共%d个块", file_name, len(chunks))
         embeddings = llm_client.embed(chunks)
+        logger.info("向量嵌入完成: %s, 向量维度=%d", file_name, len(embeddings[0]) if embeddings else 0)
 
         # 存入向量库
         metadatas = [{"name": file_name, "doc_id": doc_id} for _ in chunks]
         vector_store.add_document(doc_id, chunks, embeddings, metadatas)
+        logger.info("向量库写入完成: %s, 共%d条", file_name, len(chunks))
 
         # 更新状态
         _update_doc_status(db, doc_id, "processed")
-    except Exception:
+        logger.info("文档处理成功: %s", file_name)
+    except Exception as e:
+        logger.error("文档处理失败: %s, 错误: %s", file_name, str(e), exc_info=True)
         _update_doc_status(db, doc_id, "failed")
     finally:
         db.close()

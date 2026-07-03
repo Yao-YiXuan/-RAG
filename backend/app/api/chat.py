@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -7,6 +9,8 @@ from app.core.llm_client import llm_client
 from app.core.vector_store import vector_store
 from app.core.rag_pipeline import RAGPipeline
 from app.config import settings
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/chat", tags=["聊天"])
 
@@ -18,7 +22,7 @@ def _get_rag_settings(db: Session) -> dict:
         settings_map[row.key] = row.value
     return {
         "retrieval_count": int(settings_map.get("retrieval_count", "5")),
-        "similarity_threshold": float(settings_map.get("similarity_threshold", "0.75")),
+        "similarity_threshold": float(settings_map.get("similarity_threshold", "0.45")),
         "llm_api_key": settings_map.get("llm_api_key", settings.llm_api_key),
         "llm_base_url": settings_map.get("llm_base_url", settings.llm_base_url),
         "llm_model_name": settings_map.get("llm_model_name", settings.llm_model_name),
