@@ -1,5 +1,5 @@
 const API_BASE = '/api';
-const TIMEOUT_MS = 15_000;
+const TIMEOUT_MS = 120_000;
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const controller = new AbortController();
